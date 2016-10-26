@@ -31,15 +31,15 @@ void OpenBCI_Wifi_Class::begin(void) {
  */
 void OpenBCI_Wifi_Class::begin(boolean debug) {
   initialize(debug);
-  configure(debug)
+  configure(debug);
 }
 
 void OpenBCI_Wifi_Class::configure(boolean debug) {
   debugMode = debug;
   lastTimeSpiRead = 0;
   lastChipSelectLevel = 0;
-  streamPacketBufferHead = 0;
-  streamPacketBufferTail = 0;
+  packetBufferHead = 0;
+  packetBufferTail = 0;
 }
 
 void OpenBCI_Wifi_Class::initialize() {
@@ -63,47 +63,51 @@ void OpenBCI_Wifi_Class::initializeSPISlave(boolean debug) {
   SPISlave.onData([](uint8_t * data, size_t len) {
 
     // Copy incoming data
-    memcpy(packetBuffer[packetBufferHead], data, 5 );
+    memcpy(OpenBCI_Wifi.packetBuffer[OpenBCI_Wifi.packetBufferHead], data, len);
     // Increment the head
-    packetBufferHead++;
-    if (packetBufferHead >= OPENBCI_NUMBER_STREAM_BUFFERS) packetBufferHead = 0;
+    OpenBCI_Wifi.packetBufferHead++;
+    if (OpenBCI_Wifi.packetBufferHead >= OPENBCI_NUMBER_STREAM_BUFFERS) OpenBCI_Wifi.packetBufferHead = 0;
 
     // If we are in debug mode then pring out the data to Serial
-    if (debugMode) {
-      Serial.printf("SPI Input: %s\n", (char *)data);
+    if (OpenBCI_Wifi.debugMode) {
+      Serial.printf("Input: %s\n", (char *)data);
     }
   });
 
   // The master has read out outgoing data buffer
   // that buffer can be set with SPISlave.setData
   SPISlave.onDataSent([]() {
-      Serial.println("Answer Sent");
+      Serial.println("Sent data");
   });
 
   // status has been received from the master.
   // The status register is a special register that both the slave and the
   // master can write to and read from. Can be used to exchange small data
   // or status information
-  SPISlave.onStatus([](uint32_t data) {
-      Serial.printf("Status: %u\n", data);
-      SPISlave.setStatus(millis()); //set next status
-  });
+  // SPISlave.onStatus([](uint32_t data) {
+  //     Serial.printf("Status: %u\n", data);
+  //     SPISlave.setStatus(millis()); //set next status
+  // });
 
   // The master has read the status register
-  SPISlave.onStatusSent([]() {
-      Serial.println("Status Sent");
-  });
+  // SPISlave.onStatusSent([]() {
+  //     Serial.println("Status Sent");
+  // });
 
   // Setup SPI Slave registers and pins
   SPISlave.begin();
 
   // Set the status register (if the master reads it, it will read this value)
-  SPISlave.setStatus(millis());
+  // SPISlave.setStatus(millis());
 
   // Sets the data registers. Limited to 32 bytes at a time.
   // SPISlave.setData(uint8_t * data, size_t len); is also available with the same limitation
-  SPISlave.setData("Ask me a question!");
+  // SPISlave.setData("Ask me a question!");
+  //
+  if (debugMode) {
+    Serial.println("Ready and in Debug Mode");
+  }
 }
 
 
-OpenBCI_Wifi_Class wifi;
+OpenBCI_Wifi_Class OpenBCI_Wifi;

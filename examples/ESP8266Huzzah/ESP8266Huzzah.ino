@@ -25,7 +25,7 @@ const uint8_t minRand = 48;
 
 unsigned int localPort = 2390;      // local port to listen for UDP packets
 
-byte updPacketBuffer[512]; //buffer to hold incoming and outgoing packets
+byte udpPacketBuffer[512]; //buffer to hold incoming and outgoing packets
 
 // A UDP instance to let us send and receive packets over UDP
 WiFiUDP Udp;
@@ -34,8 +34,8 @@ IPAddress client;
 
 WiFiServer server(80);
 
-uint8_t packetCount = 0
-uint8_t maxPacketsPerUDPPacket = 8
+uint8_t packetCount = 0;
+uint8_t maxPacketsPerUDPPacket = 8;
 
 boolean packing = false;
 boolean clientSet = false;
@@ -44,7 +44,7 @@ uint8_t lastSS = 0;
 
 void setup() {
   // Start up wifi for OpenBCI
-  wifi.begin(true);
+  OpenBCI_Wifi.begin(true);
 
   Udp.begin(localPort);
 
@@ -68,18 +68,18 @@ void setup() {
 
 void loop() {
 
-  if (wifi.packetBufferTail != wifi.packetBufferHead) {
+  if (OpenBCI_Wifi.packetBufferTail != OpenBCI_Wifi.packetBufferHead) {
     // Try to add the tail to the TX buffer
     if (clientSet) {
       if  (packetCount == 0) {
         Udp.beginPacket(client,2391);
       }
-      Udp.write(wifi.packetBuffer[packetBufferTail], OPENBCI_MAX_PACKET_SIZE_BYTES);
+      Udp.write(OpenBCI_Wifi.packetBuffer[OpenBCI_Wifi.packetBufferTail], OPENBCI_MAX_PACKET_SIZE_BYTES);
       packetCount++;
 
-      wifi.packetBufferTail++;
-      if (wifi.packetBufferTail >= OPENBCI_NUMBER_STREAM_BUFFERS) {
-        wifi.packetBufferTail = 0;
+      OpenBCI_Wifi.packetBufferTail++;
+      if (OpenBCI_Wifi.packetBufferTail >= OPENBCI_NUMBER_STREAM_BUFFERS) {
+        OpenBCI_Wifi.packetBufferTail = 0;
       }
 
       if (packetCount > maxPacketsPerUDPPacket) {
@@ -102,8 +102,8 @@ void loop() {
     Udp.read(udpPacketBuffer,noBytes); // read the packet into the buffer
 
     // display the packet contents in HEX
-    for (int i=1;i<=noBytes;i++){
-      Serial.write(packetBuffer[i-1]);
+    for (int i = 1; i <= noBytes; i++){
+      Serial.write(udpPacketBuffer[i - 1]);
     }
   }
 

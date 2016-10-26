@@ -13,6 +13,8 @@
 #ifndef __OpenBCI_Wifi__
 #define __OpenBCI_Wifi__
 
+#include "SPISlave.h"
+#include <Arduino.h>
 #include "OpenBCI_Wifi_Definitions.h"
 
 class OpenBCI_Wifi_Class {
@@ -20,6 +22,7 @@ class OpenBCI_Wifi_Class {
 public:
 
   // Functions and Methods
+  OpenBCI_Wifi_Class();
   void begin(void);
   void begin(boolean);
   void configure(boolean);
@@ -36,10 +39,13 @@ public:
   volatile uint8_t packetBufferTail;
   unsigned long lastTimeSpiRead;
 
+private:
+  boolean debugMode;
+
 
 };
 
 // Very important, major key to success #christmas
-extern OpenBCI_Wifi_Class wifi;
+extern OpenBCI_Wifi_Class OpenBCI_Wifi;
 
 #endif // OPENBCI_WIFI_H
