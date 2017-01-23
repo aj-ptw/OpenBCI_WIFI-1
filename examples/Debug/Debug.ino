@@ -20,6 +20,8 @@ void setup() {
   OpenBCI_Wifi.begin(true);
 
   Serial.print("Time for wifi's");
+
+  pinMode(15,INPUT);
 }
 
 void loop() {
