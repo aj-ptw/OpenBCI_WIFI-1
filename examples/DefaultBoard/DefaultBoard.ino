@@ -43,6 +43,9 @@
 #define BOARD_TYPE_GANGLION "ganglion"
 #define BOARD_TYPE_NONE "none"
 
+#define FIREBASE_HOST "openbci-c0788.firebaseio.com"
+#define FIREBASE_AUTH "iypNKz5p6qRY1koTMwSzpru613vGqQo92B86cse6"
+
 #define JSON_BOARD_CONNECTED "board_connected"
 #define JSON_BOARD_TYPE "board_type"
 #define JSON_COMMAND "command"
@@ -74,6 +77,7 @@
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <WebSocketsServer.h>
+#include <FirebaseArduino.h>
 #include <Hash.h>
 
 // ENUMS
@@ -89,6 +93,7 @@ typedef enum OUTPUT_MODE {
 
 typedef enum OUTPUT_PROTOCOL {
   OUTPUT_PROTOCOL_NONE,
+  OUTPUT_PROTOCOL_FIREBASE,
   OUTPUT_PROTOCOL_TCP,
   OUTPUT_PROTOCOL_MQTT,
   OUTPUT_PROTOCOL_WEB_SOCKETS
@@ -1023,7 +1028,8 @@ void initializeVariables() {
   // curOutputMode = OUTPUT_MODE_RAW;
   curOutputMode = OUTPUT_MODE_JSON;
   // curOutputProtocol = OUTPUT_PROTOCOL_MQTT;
-  curOutputProtocol = OUTPUT_PROTOCOL_TCP;
+  //curOutputProtocol = OUTPUT_PROTOCOL_TCP;
+  curOutputProtocol = OUTPUT_PROTOCOL_FIREBASE;
   curClientResponse = CLIENT_RESPONSE_NONE;
 
   passthroughBufferClear();
@@ -1385,6 +1391,8 @@ void setup() {
   MDNS.addService("http", "tcp", 80);
   MDNS.addService("ws", "tcp", 81);
 
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+
 #ifdef DEBUG
     Serial.printf("Ready!\n");
 #endif
@@ -1582,11 +1590,23 @@ void loop() {
           clientTCP.write("\r\n");
         }
 
+      } else if (curOutputProtocol == OUTPUT_PROTOCOL_FIREBASE) {
+        root.printTo(jsonStr);
+        Firebase.setString("data", jsonStr);
+        jsonStr = "";
+
       } else {
         root.printTo(jsonStr);
         clientMQTT.publish("openbci", jsonStr.c_str());
         jsonStr = "";
       }
+    }
+
+    // handle error
+    if (Firebase.failed()) {
+      Serial.print("setting /number failed:");
+      Serial.println(Firebase.error());  
+      return;
     }
 
     digitalWrite(5, LOW);
