@@ -16,6 +16,7 @@
 #include <ArduinoOTA.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
+#include <WiFiClientSecure.h>
 #include "OpenBCI_Wifi_Definitions.h"
 #include "OpenBCI_Wifi.h"
 
@@ -40,7 +41,7 @@ unsigned long lastMQTTConnectAttempt;
 unsigned long ntpLastTimeSeconds;
 
 WiFiClient clientTCP;
-WiFiClient espClient;
+WiFiClientSecure espClient;
 PubSubClient clientMQTT(espClient);
 
 ///////////////////////////////////////////
