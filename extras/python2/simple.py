@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-import urllib2
+
 import socket
 import json
-
-WIFI_IP = ''
 
 TCP_IP = '192.168.0.14'
 TCP_PORT = 5005
@@ -21,7 +19,7 @@ while 1:
         json_object = json.loads(data)
         chunk = json_object["chunk"]
         for sample in chunk:
-            print sample["channelData"]
+            print sample["sampleNumber"]
     except BaseException as e:
         pass
         # print e
