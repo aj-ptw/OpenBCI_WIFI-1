@@ -53,7 +53,6 @@ boolean mqttConnect(String username, String password) {
     Serial.println(JSON_CONNECTED);
 #endif
     // Once connected, publish an announcement...
-    clientMQTT.publish("openbci:eeg", "Will you Push The World?");
     return true;
   } else {
     // Wait 5 seconds before retrying
@@ -68,7 +67,6 @@ boolean mqttConnect() {
     Serial.println(JSON_CONNECTED);
 #endif
     // Once connected, publish an announcement...
-    clientMQTT.publish("openbci:egg", "Will you Push The World?");
     return true;
   } else {
     // Wait 5 seconds before retrying
@@ -479,9 +477,9 @@ void mqttSetup() {
   }
   sendHeadersForCORS();
   if (connected) {
-    return server.send(200, "text/json", wifi.getInfoMQTT(true));
+    return server.send(200, "text/json", "{\"connected\":true}");
   } else {
-    return server.send(505, "text/json", wifi.getInfoMQTT(false));
+    return server.send(505, "text/json", "{\"connected\":false}");
   }
 }
 

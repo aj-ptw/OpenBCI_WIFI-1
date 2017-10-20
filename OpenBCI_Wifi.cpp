@@ -229,7 +229,6 @@ String OpenBCI_Wifi_Class::getInfoMQTT(boolean clientMQTTConnected) {
   JsonObject& root = jsonBuffer.createObject();
   root[JSON_MQTT_BROKER_ADDR] = String(mqttBrokerAddress);
   root[JSON_CONNECTED] = clientMQTTConnected ? true : false;
-  root[JSON_MQTT_USERNAME] = String(mqttUsername);
   root[JSON_TCP_OUTPUT] = getCurOutputModeString();
   root[JSON_LATENCY] = getLatency();
   root[JSON_MQTT_PORT] = mqttPort;
