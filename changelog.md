@@ -1,3 +1,9 @@
+# v1.2.1
+
+### Bug Fixes
+
+* MQTT with long username, 1620 characters, not able to send back return.
+
 # v1.2.0
 
 ### Bug Fixes
