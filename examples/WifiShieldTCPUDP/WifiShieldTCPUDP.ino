@@ -409,11 +409,11 @@ void initializeVariables() {
 void setup() {
   initializeVariables();
 
-  #ifdef DEBUG
+#ifdef DEBUG
   Serial.begin(230400);
   Serial.setDebugOutput(true);
   Serial.println("Serial started");
-  #endif
+#endif
 
   wifi.begin();
 
@@ -474,9 +474,9 @@ void setup() {
 
   if (WiFi.SSID().equals("")) {
     WiFi.mode(WIFI_AP);
-  #ifdef DEBUG
+#ifdef DEBUG
     Serial.println("Turning wifi into access point");
-  #endif
+#endif
   }
 
   server.on(HTTP_ROUTE, HTTP_GET, [](){
@@ -696,10 +696,8 @@ void loop() {
     //WiFiManager
     //Local intialization. Once its business is done, there is no need to keep it around
     WiFiManager wifiManager;
-    // WiFiManagerParameter custom_text("<p>Powered by Push The World</p>");
-    // wifiManager.addParameter(&custom_text);
-    // wifiManager.setConfigPortalTimeout(10);
-    // WiFiManager wifiManager;
+    WiFiManagerParameter custom_text("<p>Powered by Push The World</p>");
+    wifiManager.addParameter(&custom_text);
 #ifdef DEBUG
     Serial.printf("Start WiFi Config Portal on WiFi Manager with %d bytes on heap\n" , ESP.getFreeHeap());
 #endif
@@ -715,11 +713,9 @@ void loop() {
     Serial.printf("Stop WiFi Manager with %d bytes on heap\n" , ESP.getFreeHeap());
 #endif
     restartServer = true;
-
   }
 
   if (restartServer) {
-    // restartServer = false;
     server.begin();
   }
 
