@@ -17,6 +17,7 @@
 #ifndef __OpenBCI_Wifi__
 #define __OpenBCI_Wifi__
 
+#include <stdlib.h>
 #include <Arduino.h>
 #include <time.h>
 #include <ESP8266WiFi.h>
@@ -176,7 +177,7 @@ public:
   OUTPUT_MODE curOutputMode;
   OUTPUT_PROTOCOL curOutputProtocol;
 
-  uint8_t rawBuffer[NUM_PACKETS_IN_RING_BUFFER_RAW][BYTES_PER_SPI_PACKET];
+  uint8_t *rawBuffer;
 
 #ifdef RAW_TO_JSON
   Sample sampleBuffer[NUM_PACKETS_IN_RING_BUFFER_JSON];

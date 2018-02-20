@@ -41,7 +41,8 @@ WiFiClient clientTCP;
 
 uint8_t buffer[1440];
 uint32_t bufferPosition = 0;
-
+uint32_t numPacketsInRB = 0;
+uint32_t rbSize = 0;
 ///////////////////////////////////////////
 // Utility functions
 ///////////////////////////////////////////
@@ -620,6 +621,16 @@ void setup() {
     debugPrintGet();
 #endif
     if (!wifi.spiHasMaster()) return returnNoSPIMaster();
+    rbSize = ESP.getFreeHeap() - 4000;
+    rbSize -= (rbSize % BYTES_PER_SPI_PACKET);
+    wifi.rawBuffer = malloc(rbSize);
+    if (wifi.rawBuffer === NULL) {
+      returnFail(400, "Not enough free heap");
+      rbSize = 0;
+      numPacketsInRB = 0;
+      return;
+    }
+    numPacketsInRB = rbSize / BYTES_PER_SPI_PACKET;
     wifi.passthroughCommands("b");
     SPISlave.setData(wifi.passthroughBuffer, BYTES_PER_SPI_PACKET);
     returnOK();
@@ -631,6 +642,9 @@ void setup() {
     debugPrintGet();
 #endif
     if (!wifi.spiHasMaster()) return returnNoSPIMaster();
+    free(wifi.rawBuffer);
+    rbSize = 0;
+    numPacketsInRB = 0;
     wifi.passthroughCommands("s");
     SPISlave.setData(wifi.passthroughBuffer, BYTES_PER_SPI_PACKET);
     returnOK();
@@ -871,7 +885,7 @@ void loop() {
 
   int packetsToSend = wifi.rawBufferHead - wifi.rawBufferTail;
   if (packetsToSend < 0) {
-    packetsToSend = NUM_PACKETS_IN_RING_BUFFER_RAW + packetsToSend; // for wrap around
+    packetsToSend = numPacketsInRB + packetsToSend; // for wrap around
   }
   if (packetsToSend > MAX_PACKETS_PER_SEND_TCP) {
     packetsToSend = MAX_PACKETS_PER_SEND_TCP;
@@ -882,14 +896,14 @@ void loop() {
 
     uint32_t taily = wifi.rawBufferTail;
     for (uint8_t i = 0; i < packetsToSend; i++) {
-      if (taily >= NUM_PACKETS_IN_RING_BUFFER_RAW) {
+      if (taily >= numPacketsInRB) {
         taily = 0;
       }
-      uint8_t *buf = wifi.rawBuffer[taily];
-      uint8_t stopByte = buf[0];
+      uint32_t position = taily * BYTES_PER_SPI_PACKET;
+      uint8_t stopByte = wifi.rawBuffer[position++];
       buffer[bufferPosition++] = STREAM_PACKET_BYTE_START;
       for (int i = 1; i < BYTES_PER_SPI_PACKET; i++) {
-        buffer[bufferPosition++] = buf[i];
+        buffer[bufferPosition++] = buf[position++];
       }
       buffer[bufferPosition++] = stopByte;
       taily += 1;
@@ -917,7 +931,7 @@ void loop() {
       }
     }
     bufferPosition = 0;
-    wifi.rawBufferTail = taily;
+    wifi.rawBufferTail = taily++;
     digitalWrite(LED_NOTIFY, HIGH);
   }
 }
