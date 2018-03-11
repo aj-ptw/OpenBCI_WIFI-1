@@ -931,7 +931,7 @@ void loop() {
       }
     }
     bufferPosition = 0;
-    wifi.rawBufferTail = taily++;
+    wifi.rawBufferTail = taily;
     digitalWrite(LED_NOTIFY, HIGH);
   }
 }
