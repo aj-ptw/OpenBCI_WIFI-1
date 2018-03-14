@@ -9,9 +9,9 @@
 #ifndef __OpenBCI_Wifi_Definitions__
 #define __OpenBCI_Wifi_Definitions__
 
-#define SOFTWARE_VERSION "v2.0.4"
+#define SOFTWARE_VERSION "v2.1.0"
 
-// #define DEBUG 1
+#define DEBUG 1
 
 #ifdef RAW_TO_JSON
   #define ADS1299_VREF 4.5

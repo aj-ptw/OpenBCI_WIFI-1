@@ -620,19 +620,26 @@ void setup() {
 #ifdef DEBUG
     debugPrintGet();
 #endif
-    if (!wifi.spiHasMaster()) return returnNoSPIMaster();
-    rbSize = ESP.getFreeHeap() - 4000;
-    rbSize -= (rbSize % BYTES_PER_SPI_PACKET);
-    wifi.rawBuffer = malloc(rbSize);
-    if (wifi.rawBuffer === NULL) {
-      returnFail(400, "Not enough free heap");
-      rbSize = 0;
-      numPacketsInRB = 0;
-      return;
+    // if (!wifi.spiHasMaster()) return returnNoSPIMaster();
+    if (wifi.rawBuffer == NULL) {
+      rbSize = ESP.getFreeHeap() - 4000;
+      rbSize -= (rbSize % BYTES_PER_SPI_PACKET);
+      numPacketsInRB = rbSize / BYTES_PER_SPI_PACKET;
+      wifi.rawBuffer =  (uint8_t*)malloc(rbSize);
+      if (wifi.rawBuffer == NULL) {
+        returnFail(400, "Not enough free heap");
+        rbSize = 0;
+        numPacketsInRB = 0;
+        return;
+      }
+#ifdef DEBUG
+    Serial.printf("Ring buffer size: %d for a total of %d packets\n", rbSize, numPacketsInRB);
+#endif
+
     }
-    numPacketsInRB = rbSize / BYTES_PER_SPI_PACKET;
     wifi.passthroughCommands("b");
     SPISlave.setData(wifi.passthroughBuffer, BYTES_PER_SPI_PACKET);
+    // SSDP.end();
     returnOK();
   });
   server.on(HTTP_ROUTE_STREAM_START, HTTP_OPTIONS, sendHeadersForOptions);
@@ -641,7 +648,8 @@ void setup() {
 #ifdef DEBUG
     debugPrintGet();
 #endif
-    if (!wifi.spiHasMaster()) return returnNoSPIMaster();
+    // if (!wifi.spiHasMaster()) return returnNoSPIMaster();
+    // SSDP.begin();
     free(wifi.rawBuffer);
     rbSize = 0;
     numPacketsInRB = 0;
@@ -861,7 +869,7 @@ void loop() {
 #ifdef DEBUG
     Serial.printf("%d bytes on heap before stopping local server\n", ESP.getFreeHeap());
 #endif
-    server.stop();
+    // server.stop();
     delay(1);
 #ifdef DEBUG
     Serial.printf("%d bytes on after stopping local server\n", ESP.getFreeHeap());
@@ -903,7 +911,7 @@ void loop() {
       uint8_t stopByte = wifi.rawBuffer[position++];
       buffer[bufferPosition++] = STREAM_PACKET_BYTE_START;
       for (int i = 1; i < BYTES_PER_SPI_PACKET; i++) {
-        buffer[bufferPosition++] = buf[position++];
+        buffer[bufferPosition++] = wifi.rawBuffer[position++];
       }
       buffer[bufferPosition++] = stopByte;
       taily += 1;
