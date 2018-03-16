@@ -965,6 +965,14 @@ void OpenBCI_Wifi_Class::spiOnDataSent(void) {
 }
 
 void OpenBCI_Wifi_Class::spiProcessPacket(uint8_t *data) {
+  // for (int i = 0; i < 32; i++) {
+  //   if (data[i] < 16) {
+  //     Serial.print("0");
+  //   }
+  //   Serial.print(data[i], HEX); 
+  //   Serial.print(" ");
+  // }
+  // Serial.println();
   if (isAStreamByte(data[0])) {
     spiProcessPacketStream(data);
   } else {

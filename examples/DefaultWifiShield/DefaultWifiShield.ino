@@ -21,8 +21,6 @@ boolean tryConnectToAP;
 boolean wifiReset;
 boolean ledState;
 
-WiFiManager wifiManager;
-
 int ledFlashes;
 int ledInterval;
 unsigned long ledLastFlash;
@@ -501,9 +499,6 @@ void setup() {
     SPISlave.setStatus(209);
   });
 
-  // Setup SPI Slave registers and pins
-  SPISlave.begin();
-
   // Set the status register (if the master reads it, it will read this value)
   SPISlave.setStatus(209);
   SPISlave.setData(wifi.passthroughBuffer, BYTES_PER_SPI_PACKET);
@@ -678,15 +673,15 @@ void setup() {
   server.on(HTTP_ROUTE_LATENCY, HTTP_POST, setLatency);
   server.on(HTTP_ROUTE_LATENCY, HTTP_OPTIONS, sendHeadersForOptions);
 
-//   if (!MDNS.begin(wifi.getName().c_str())) {
-// #ifdef DEBUG
-//     Serial.println("Error setting up MDNS responder!");
-// #endif
-//   } else {
-// #ifdef DEBUG
-//     Serial.print("Your ESP is called "); Serial.println(wifi.getName());
-// #endif
-//   }
+  if (!MDNS.begin(wifi.getName().c_str())) {
+#ifdef DEBUG
+    Serial.println("Error setting up MDNS responder!");
+#endif
+  } else {
+#ifdef DEBUG
+    Serial.print("Your ESP is called "); Serial.println(wifi.getName());
+#endif
+  }
 
   server.onNotFound([](){
 #ifdef DEBUG
@@ -754,7 +749,8 @@ void setup() {
 #endif
     httpUpdater.setup(&server);
     server.begin();
-    // MDNS.addService("http", "tcp", 80);
+    MDNS.addService("http", "tcp", 80);
+    SPISlave.begin();    
     ledFlashes = 10;
     ledInterval = 100;
     ledLastFlash = millis();
@@ -770,9 +766,6 @@ void setup() {
     Serial.printf("Stored creds, will try to connect for 10 seconds with %d bytes on heap\n", ESP.getFreeHeap());
 #endif
   }
-
-  WiFiManagerParameter custom_text("<p>Powered by Push The World</p>");
-  wifiManager.addParameter(&custom_text);
 
 #ifdef DEBUG
   Serial.printf("END OF SETUP HEAP: %d\n", ESP.getFreeHeap());
@@ -822,6 +815,7 @@ void loop() {
       httpUpdater.setup(&server);
       server.begin();
       MDNS.addService("http", "tcp", 80);
+      SPISlave.begin();      
       // digitalWrite(LED_NOTIFY, HIGH);
 #ifdef DEBUG
       Serial.println("Connected to network, switching to station mode.");
@@ -842,6 +836,7 @@ void loop() {
       httpUpdater.setup(&server);
       server.begin();
       MDNS.addService("http", "tcp", 80);
+      SPISlave.begin();
       ledFlashes = 10;
       ledInterval = 100;
       ledLastFlash = millis();
@@ -876,15 +871,15 @@ void loop() {
 #ifdef DEBUG
     Serial.printf("%d bytes on heap before stopping local server\n", ESP.getFreeHeap());
 #endif
-    // server.stop();
+    server.stop();
     delay(1);
 #ifdef DEBUG
     Serial.printf("%d bytes on after stopping local server\n", ESP.getFreeHeap());
 #endif
     //Local intialization. Once its business is done, there is no need to keep it around
-    // WiFiManager wifiManager;
-    // WiFiManagerParameter custom_text("<p>Powered by Push The World</p>");
-    // wifiManager.addParameter(&custom_text);
+    WiFiManager wifiManager;
+    WiFiManagerParameter custom_text("<p>Powered by Push The World</p>");
+    wifiManager.addParameter(&custom_text);
 #ifdef DEBUG
     Serial.printf("Start WiFi Config Portal on WiFi Manager with %d bytes on heap\n" , ESP.getFreeHeap());
 #endif
