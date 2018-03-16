@@ -619,7 +619,7 @@ void setup() {
 #endif
     // if (!wifi.spiHasMaster()) return returnNoSPIMaster();
     if (wifi.rawBuffer == NULL) {
-      rbSize = ESP.getFreeHeap() - 4000;
+      rbSize = ESP.getFreeHeap() - 8000;
       rbSize -= (rbSize % BYTES_PER_SPI_PACKET);
       numPacketsInRB = rbSize / BYTES_PER_SPI_PACKET;
       wifi.rawBuffer =  (uint8_t*)malloc(rbSize);
