@@ -964,6 +964,7 @@ boolean OpenBCI_Wifi_Class::spiHasMaster(void) {
 
 void OpenBCI_Wifi_Class::spiOnDataSent(void) {
   lastTimeWasPolled = millis();
+  Serial.println("Polled");
   passthroughBufferClear();
 }
 
@@ -986,10 +987,15 @@ void OpenBCI_Wifi_Class::spiProcessPacket(uint8_t *data) {
 }
 
 void OpenBCI_Wifi_Class::spiProcessPacketGain(uint8_t *data) {
+  Serial.println("spiProcessPacket: gains");
+  for (int i = 0; i < 32; i++) {
+    Serial.print(data[i], HEX);
+  }
   if (data[0] > 0) {
     if (data[0] == data[1]) {
       switch (data[0]) {
         case WIFI_SPI_MSG_GAINS:
+        Serial.println("woo");
           setGains(data);
           break;
         default:

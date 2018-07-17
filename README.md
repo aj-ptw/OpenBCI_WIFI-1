@@ -11,7 +11,7 @@
 
 First and foremost, Welcome! :tada: Willkommen! :confetti_ball: Bienvenue! :balloon::balloon::balloon:
 
-Thank you for visiting the OpenBCI WiFi Shield Library repository.
+Thank you for visiting the OpenBCI Air Shield Library repository.
 
 This document (the README file) is a hub to give you some information about the project. Jump straight to one of the sections below, or just scroll down to find out more.
 
